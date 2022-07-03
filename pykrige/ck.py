@@ -139,7 +139,7 @@ class ClassificationKriging:
 
         print("Finished kriging residuals")
 
-    def predict(self, p, x, **kwargs):
+    def predict_proba(self, p, x, **kwargs):
         """
         Predict.
 
@@ -166,7 +166,32 @@ class ClassificationKriging:
         pred_proba_ilr = self.krige_residual(x, **kwargs) + ml_pred_ilr
         pred_proba = inverse_ilr_transformation(pred_proba_ilr)
 
+    def predict(self, p, x, **kwargs):
+        """
+        Predict.
+
+        Parameters
+        ----------
+        p: ndarray
+            (Ns, d) array of predictor variables (Ns samples, d dimensions)
+            for classification
+        x: ndarray
+            ndarray of (x, y) points. Needs to be a (Ns, 2) array
+            corresponding to the lon/lat, for example.
+            array of Points, (x, y, z) pairs of shape (N, 3) for 3d kriging
+
+        Returns
+        -------
+        pred: ndarray
+            The expected value of ys for the query inputs, of shape (Ns,).
+
+        """
+
+        pred_proba = self.predict_proba(p, x, **kwargs)
+
         return np.argmax(pred_proba, axis=1)
+
+        return pred_proba
 
     def krige_residual(self, x, **kwargs):
         """
