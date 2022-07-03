@@ -9,9 +9,10 @@ from sklearn.metrics import accuracy_score
 from sklearn.svm import SVC
 from sklearn.preprocessing import OneHotEncoder
 from scipy.linalg import helmert
+from sklearn.base import BaseEstimator, ClassifierMixin
 
 
-class ClassificationKriging:
+class ClassificationKriging(BaseEstimator, ClassifierMixin):
     """
     An implementation of Simplicial Indicator Kriging applied to classification ilr transformed residuals.
 
