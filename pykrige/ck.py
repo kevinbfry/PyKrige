@@ -104,7 +104,46 @@ class ClassificationKriging(BaseEstimator, ClassifierMixin):
             functional_drift=functional_drift,
         )
 
-    def fit(self, p, x, y):
+        (self.method,
+         self.variogram_model,
+         self.nlags,
+         self.weight,
+         self.n_closest_points,
+         self.verbose,
+         self.exact_values,
+         self.pseudo_inv,
+         self.pseudo_inv_type,
+         self.variogram_parameters,
+         self.variogram_function,
+         self.anisotropy_scaling,
+         self.anisotropy_angle,
+         self.enable_statistics,
+         self.coordinates_type,
+         self.drift_terms,
+         self.point_drift,
+         self.ext_drift_grid,
+         self.functional_drift) = (method,
+                                    variogram_model,
+                                    nlags,
+                                    weight,
+                                    n_closest_points,
+                                    verbose,
+                                    exact_values,
+                                    pseudo_inv,
+                                    pseudo_inv_type,
+                                    variogram_parameters,
+                                    variogram_function,
+                                    anisotropy_scaling,
+                                    anisotropy_angle,
+                                    enable_statistics,
+                                    coordinates_type,
+                                    drift_terms,
+                                    point_drift,
+                                    ext_drift_grid,
+                                    functional_drift)
+        self.kriging = True
+
+    def fit(self, p, y, x=None):
         """
         Fit the classification method and also krige the residual.
 
@@ -120,6 +159,7 @@ class ClassificationKriging(BaseEstimator, ClassifierMixin):
         y: ndarray
             array of targets (Ns, )
         """
+        y = y.reshape(-1,1)
         self.classification_model.fit(p, y.ravel())
         print("Finished learning classification model")
         self.classes_ = self.classification_model.classes_
@@ -140,7 +180,7 @@ class ClassificationKriging(BaseEstimator, ClassifierMixin):
 
         print("Finished kriging residuals")
 
-    def predict_proba(self, p, x, **kwargs):
+    def predict_proba(self, p, x=None, **kwargs):
         """
         Predict.
 
@@ -167,7 +207,9 @@ class ClassificationKriging(BaseEstimator, ClassifierMixin):
         pred_proba_ilr = self.krige_residual(x, **kwargs) + ml_pred_ilr
         pred_proba = inverse_ilr_transformation(pred_proba_ilr)
 
-    def predict(self, p, x, **kwargs):
+        return pred_proba
+
+    def predict(self, p, x=None, **kwargs):
         """
         Predict.
 
@@ -192,8 +234,6 @@ class ClassificationKriging(BaseEstimator, ClassifierMixin):
 
         return np.argmax(pred_proba, axis=1)
 
-        return pred_proba
-
     def krige_residual(self, x, **kwargs):
         """
         Calculate the residuals.
@@ -216,7 +256,7 @@ class ClassificationKriging(BaseEstimator, ClassifierMixin):
 
         return np.vstack(krig_pred).T
 
-    def score(self, p, x, y, sample_weight=None, **kwargs):
+    def score(self, p, y, x=None, sample_weight=None, **kwargs):
         """
         Overloading default classification score method.
 
